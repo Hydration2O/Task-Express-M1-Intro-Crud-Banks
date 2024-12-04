@@ -3,6 +3,18 @@ const accounts = require("./accounts");
 const app = express();
 const port = 8000;
 
+const deleteAccountById = (accountIdToBeDeleted) => {
+  const newAccountArray = accounts.filter(
+    (account) => account.id != accountIdToBeDeleted
+  );
+  console.log("My new account list are: ", newAccountArray);
+};
+
+const updateAccount = (currentAccount, newData) => {
+  const editedAccount = Object.assign(currentAccount, newData);
+  return editedAccount;
+};
+
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -22,6 +34,29 @@ app.post("/accounts", (req, res) => {
   }
   accounts.push(req.body);
   res.json(accounts);
+});
+
+app.delete("/accounts/:accountId", (req, res) => {
+  const { accountId } = req.params;
+  const account = accounts.find((account) => account.id === Number(accountId));
+  if (account) {
+    deleteAccountById(account.id);
+    res.status(204).end();
+  } else {
+    res.status(404).json();
+  }
+});
+
+app.put("/accounts/:accountId", (req, res) => {
+  const { accountId } = req.params;
+  const account = accounts.find((account) => account.id === Number(accountId));
+  if (account) {
+    const updatedAccount = updateAccount(account, req.body);
+    deleteAccountById(account.id);
+    res.status(200).json(updatedAccount);
+  } else {
+    res.status(404).json();
+  }
 });
 
 app.listen(port, () => {
