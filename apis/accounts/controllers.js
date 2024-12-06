@@ -1,42 +1,39 @@
 const accounts = require("../../accounts");
+const Account = require("../../models/Account");
 
-exports.listAccounts = (req, res) => {
+exports.listAccounts = async (req, res) => {
+  const accounts = await Account.find();
   res.status(200).json(accounts);
 };
 
-exports.createAccount = (req, res) => {
-  const newId = accounts.length + 1;
-  const newAccount = Object.assign(req.body, { id: newId });
-  const defaultFunds = 0;
-  if (!(req.body.funds in newAccount)) {
-    Object.assign(req.body, defaultFunds);
-  }
-  accounts.push(req.body);
-  res.json(accounts);
+const createAccount = async (newAccountData) => {
+  console.log("makeing new Account:", newAccountData);
+  const newAccount = await Account.create(newAccountData);
+  return newAccount;
 };
 
-const updateAccount = (currentAccount, newData) => {
-  const editedAccount = Object.assign(currentAccount, newData);
-  return editedAccount;
+exports.createAccountController = (req, res) => {
+  const newAccount = createAccount(req.body);
+  res.status(201).json(newAccount);
+};
+
+const updateAccount = async (targetAccountId, newData) => {
+  const foundAccount = await Account.findById(targetAccountId);
+  console.log("passed line 1");
+  if (foundAccount) {
+    console.log("found Account");
+    // const updatedAccount= foundAccount.updateOne(newData);
+    foundAccount.updateOne(newData);
+  }
 };
 exports.editAccount = (req, res) => {
   const { accountId } = req.params;
-  const account = accounts.find((account) => account.id === Number(accountId));
-  if (account) {
-    const updatedAccount = updateAccount(account, req.body);
-    deleteAccountById(account.id);
-    res.status(200).json(updatedAccount);
-  } else {
-    res.status(404).json();
-  }
+  const { newData } = req.body;
+  updateAccount(accountId, newData);
+  res.status(200).json();
 };
 
-const deleteAccountById = (accountIdToBeDeleted) => {
-  const newAccountArray = accounts.filter(
-    (account) => account.id != accountIdToBeDeleted
-  );
-  console.log("My new account list are: ", newAccountArray);
-};
+const deleteAccountById = (accountIdToBeDeleted) => {};
 exports.deleteAccount = (req, res) => {
   const { accountId } = req.params;
   const account = accounts.find((account) => account.id === Number(accountId));

@@ -5,18 +5,14 @@ const router = express.Router();
 
 const {
   listAccounts,
-  createAccount,
+  createAccountController,
   editAccount,
   deleteAccount,
 } = require("./controllers");
 
-router.get("/", (req, res) => {
-  res.send("Hello World!");
-});
-
 router.get("/", listAccounts);
 
-router.post("/", createAccount);
+router.post("/", createAccountController);
 
 router.delete("/:accountId", deleteAccount);
 
