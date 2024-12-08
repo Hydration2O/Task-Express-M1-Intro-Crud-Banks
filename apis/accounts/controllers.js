@@ -19,26 +19,32 @@ exports.createAccountController = (req, res) => {
 
 const updateAccount = async (targetAccountId, newData) => {
   const foundAccount = await Account.findById(targetAccountId);
-  console.log("passed line 1");
   if (foundAccount) {
     console.log("found Account");
-    // const updatedAccount= foundAccount.updateOne(newData);
-    foundAccount.updateOne(newData);
+    await foundAccount.updateOne(newData);
   }
 };
-exports.editAccount = (req, res) => {
+exports.editAccount = async (req, res) => {
   const { accountId } = req.params;
-  const { newData } = req.body;
-  updateAccount(accountId, newData);
-  res.status(200).json();
+  const newData = req.body;
+  const foundAccount = await Account.findById(accountId);
+  if (foundAccount) {
+    updateAccount(accountId, newData);
+    res.status(201).json();
+  }
+  res.status(404).json();
 };
 
-const deleteAccountById = (accountIdToBeDeleted) => {};
-exports.deleteAccount = (req, res) => {
+const deleteAccountById = async (accountIdToBeDeleted) => {
+  const targetAccount = await Account.findById(accountIdToBeDeleted);
+  const tester = await targetAccount.deleteOne();
+};
+exports.deleteAccount = async (req, res) => {
   const { accountId } = req.params;
-  const account = accounts.find((account) => account.id === Number(accountId));
-  if (account) {
-    deleteAccountById(account.id);
+  const targetAccount = await Account.findById(accountId);
+  if (targetAccount) {
+    console.log("target aquired");
+    deleteAccountById(accountId);
     res.status(204).end();
   } else {
     res.status(404).json();
